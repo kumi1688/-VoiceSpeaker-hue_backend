@@ -3,7 +3,7 @@ var express = require('express');
 var router = express.Router();
 const amqp = require('amqplib/callback_api');
 const RabbitmqWrapper = require('../rabbitmq/rabbitmq.js');
-const {sendData} = require('./function.js');
+const {sendData, getBulbState} = require('./function.js');
 
 const url = 'amqp://ksh:1234@3.34.5.103';
 const hueBaseUrl = 'http://210.107.205.200:8080/api/wkcBD-lTULsGrCJ2hqZZqgeQsfathjs6zc3Rul1O/lights/10';
@@ -16,11 +16,12 @@ amqp.connect(url, (error0, connection)=>{
     channel.assertQueue('req/hue/state', {
       durable: false
     });
-
+        
     channel.consume('req/hue/state', async (msg)=>{
       console.log('[x] Received %s', 'req/hue/state');
-        const result = await axios.get(hueBaseUrl);
-        sendData(url, 'res/hue/state', result.data.state);
+        const data = await getBulbState();
+        // console.log(data);
+        sendData(url, 'res/hue/state', data);
     }, {noAck:true});
   })
 });

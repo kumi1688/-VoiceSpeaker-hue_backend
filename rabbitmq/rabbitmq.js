@@ -42,7 +42,7 @@ class RabbitmqWrapper {
     }
 
     encode(doc) {
-        console.log(JSON.stringify(doc));
+        // console.log(JSON.stringify(doc));
         return Buffer.from(JSON.stringify(doc));
     }
 

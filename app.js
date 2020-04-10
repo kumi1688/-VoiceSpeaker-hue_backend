@@ -32,4 +32,18 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+let bulbState = {};
+let beforeBulbState = {};
+const {getBulbState, sendData} = require('./routes/function.js');
+
+setInterval(async () => {
+  bulbState = await getBulbState();
+  if(bulbState.on !== beforeBulbState.on){
+    console.log(bulbState.on);
+    
+    sendData('amqp://ksh:1234@3.34.5.103', 'res/hue/state', bulbState);
+  }
+  beforeBulbState = bulbState;
+}, 500);
+
 module.exports = app;
