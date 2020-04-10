@@ -28,6 +28,24 @@ amqp.connect(url, (error0, connection)=>{
 
 amqp.connect(url, (error0, connection)=>{
   if(error0){throw error0;}
+  connection.createChannel((error1, channel)=>{
+    if(error1) {throw error1;}
+
+    channel.assertQueue('clova/req/hue/state', {
+      durable: false
+    });
+        
+    channel.consume('clova/req/hue/state', async (msg)=>{
+      console.log('[x] Received %s', 'clova/req/hue/state');
+        const data = await getBulbState();
+        // console.log(data);
+        sendData(url, 'clova/res/hue/state', data);
+    }, {noAck:true});
+  })
+});
+
+amqp.connect(url, (error0, connection)=>{
+  if(error0){throw error0;}
 
   connection.createChannel((error1, channel)=>{
     if(error1) {throw error1};
@@ -40,7 +58,7 @@ amqp.connect(url, (error0, connection)=>{
 
     channel.consume('req/hue/light', (msg)=>{
         const value = msg.content.toString();
-        console.log('[x] Received %s', value);
+        console.log('[x] Received req/hue/light %s', value);
         
         axios.put(`${hueBaseUrl}/state`, {
             on: value === '"on"' ? true : false
