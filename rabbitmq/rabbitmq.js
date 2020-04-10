@@ -27,10 +27,13 @@ class RabbitmqWrapper {
         return sending;
     }
 
-    async recvFromQueue() {
+    async recvFromQueue(type) {
         const message = await this.channel.get(this._queueName, {});
         if (message) {
             this.channel.ack(message);
+            if(type === 'json'){
+                return JSON.parse(message.content);
+            }
             return message.content.toString();
         }
         else {
@@ -39,16 +42,17 @@ class RabbitmqWrapper {
     }
 
     encode(doc) {
+        console.log(JSON.stringify(doc));
         return Buffer.from(JSON.stringify(doc));
     }
 
-    async send_helloWorld() {
+    async sendMessage(msg) {
         await this.setup();
         await this.assertQueue();
-        await this.sendToQueue('helloWorld');
+        await this.sendToQueue(msg);
     }
 
-    async recv_helloWorld() {
+    async recvMessage() {
         await this.setup();
         return await this.recvFromQueue();
     }
